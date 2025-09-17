@@ -1,0 +1,6 @@
+@Arceus_HostAddress = http://localhost:5016
+
+GET {{Arceus_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
