@@ -35,9 +35,10 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
                 money => money.Amount,
                 amount => new Domain.ValueObjects.Money(amount));
 
-        builder.Property(a => a.Version)
-            .HasColumnName("version")
-            .IsRowVersion();
+        // builder.Property(a => a.Version)
+        //     .HasColumnName("version")
+        //     .IsConcurrencyToken()
+        //     .ValueGeneratedOnAddOrUpdate();
 
         builder.HasOne(a => a.Owner)
             .WithMany(c => c.Accounts)

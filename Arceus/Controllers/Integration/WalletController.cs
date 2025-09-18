@@ -39,8 +39,7 @@ public class WalletController : ControllerBase
             var command = new ChargeWalletCommand(
                 request.CustomerId,
                 new Money(request.Amount),
-                request.PaymentToken,
-                request.CompanyId
+                request.PaymentToken
             );
 
             var result = await _mediator.Send(command, cancellationToken);
@@ -181,8 +180,7 @@ public class WalletController : ControllerBase
 public record ChargeWalletIntegrationRequest(
     long CustomerId,
     decimal Amount,
-    string PaymentToken,
-    long CompanyId
+    string PaymentToken
 );
 
 public record ChargeWalletResponse(

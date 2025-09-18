@@ -48,9 +48,9 @@ public class ChargeWalletCommandHandler : IRequestHandler<ChargeWalletCommand, C
             await _accountRepository.GetByOwnerAndTypeAsync(request.CustomerId, AccountType.Wallet, cancellationToken)
             ?? throw new InvalidOperationException($"Customer {request.CustomerId} does not have a wallet account");
 
-        var companyCashAccount =
-            await _accountRepository.GetByOwnerAndTypeAsync(request.CompanyId, AccountType.Payable, cancellationToken)
-            ?? throw new InvalidOperationException($"Company {request.CompanyId} does not have a payable account");
+        // var companyCashAccount =
+        //     await _accountRepository.GetByOwnerAndTypeAsync(request.CompanyId, AccountType.Payable, cancellationToken)
+        //     ?? throw new InvalidOperationException($"Company {request.CompanyId} does not have a payable account");
 
         // Create the transaction
         var description =
@@ -62,14 +62,14 @@ public class ChargeWalletCommandHandler : IRequestHandler<ChargeWalletCommand, C
         transaction.AddJournalEntry(customerWalletAccount.Id, Money.Zero, request.Amount);
 
         // Debit company cash account (representing cash received from payment gateway)
-        transaction.AddJournalEntry(companyCashAccount.Id, request.Amount, Money.Zero);
+        // transaction.AddJournalEntry(companyCashAccount.Id, request.Amount, Money.Zero);
 
         // Validate double-entry accounting
         transaction.ValidateDoubleEntry();
 
         // Update account balances
         customerWalletAccount.Credit(request.Amount);
-        companyCashAccount.Debit(request.Amount);
+        // companyCashAccount.Debit(request.Amount);
 
         // Mark transaction as complete
         transaction.MarkComplete();
@@ -77,7 +77,7 @@ public class ChargeWalletCommandHandler : IRequestHandler<ChargeWalletCommand, C
         // Persist changes
         await _transactionRepository.AddAsync(transaction, cancellationToken);
         _accountRepository.Update(customerWalletAccount);
-        _accountRepository.Update(companyCashAccount);
+        // _accountRepository.Update(companyCashAccount);
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

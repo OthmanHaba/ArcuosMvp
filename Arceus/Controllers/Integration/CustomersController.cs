@@ -7,22 +7,12 @@ namespace Arceus.Controllers.Integration;
 
 [ApiController]
 [Route("api/integration/customers")]
-public class CustomersController : ControllerBase
+public class CustomersController(
+    IContractorRepository contractorRepository,
+    IAccountRepository accountRepository,
+    IUnitOfWork unitOfWork)
+    : ControllerBase
 {
-    private readonly IContractorRepository _contractorRepository;
-    private readonly IAccountRepository _accountRepository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public CustomersController(
-        IContractorRepository contractorRepository,
-        IAccountRepository accountRepository,
-        IUnitOfWork unitOfWork)
-    {
-        _contractorRepository = contractorRepository;
-        _accountRepository = accountRepository;
-        _unitOfWork = unitOfWork;
-    }
-
     [HttpPost]
     public async Task<ActionResult<CreateCustomerResponse>> CreateCustomer(
         [FromBody] CreateCustomerRequest request,
@@ -32,13 +22,13 @@ public class CustomersController : ControllerBase
         {
             // Create contractor (customer)
             var contractor = new Contractor(request.FullName, ContractorType.Customer);
-            await _contractorRepository.AddAsync(contractor, cancellationToken);
+            await contractorRepository.AddAsync(contractor, cancellationToken);
 
             // Create wallet account for customer
             var walletAccount = contractor.CreateAccount(AccountType.Wallet);
-            await _accountRepository.AddAsync(walletAccount, cancellationToken);
+            await accountRepository.AddAsync(walletAccount, cancellationToken);
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return CreatedAtAction(
                 nameof(GetCustomer),
@@ -59,7 +49,7 @@ public class CustomersController : ControllerBase
     {
         try
         {
-            var contractor = await _contractorRepository.GetByIdAsync(id, cancellationToken);
+            var contractor = await contractorRepository.GetByIdAsync(id, cancellationToken);
             if (contractor == null)
             {
                 return NotFound(new { error = "Customer not found" });
@@ -68,8 +58,8 @@ public class CustomersController : ControllerBase
             // Update would require adding update methods to the domain entity
             // For now, this is a placeholder
 
-            _contractorRepository.Update(contractor);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            contractorRepository.Update(contractor);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return NoContent();
         }
@@ -84,7 +74,7 @@ public class CustomersController : ControllerBase
         long id,
         CancellationToken cancellationToken)
     {
-        var contractor = await _contractorRepository.GetByIdAsync(id, cancellationToken);
+        var contractor = await contractorRepository.GetByIdAsync(id, cancellationToken);
         if (contractor == null)
         {
             return NotFound(new { error = "Customer not found" });
@@ -106,7 +96,7 @@ public class CustomersController : ControllerBase
         long id,
         CancellationToken cancellationToken)
     {
-        var walletAccount = await _accountRepository.GetByOwnerAndTypeAsync(id, AccountType.Wallet, cancellationToken);
+        var walletAccount = await accountRepository.GetByOwnerAndTypeAsync(id, AccountType.Wallet, cancellationToken);
         if (walletAccount == null)
         {
             return NotFound(new { error = "Customer wallet not found" });

@@ -8,25 +8,13 @@ namespace Arceus.Controllers.Integration;
 
 [ApiController]
 [Route("api/integration/vendors")]
-public class VendorsController : ControllerBase
+public class VendorsController(
+    IContractorRepository contractorRepository,
+    IAccountRepository accountRepository,
+    ITransactionRepository transactionRepository,
+    IUnitOfWork unitOfWork)
+    : ControllerBase
 {
-    private readonly IContractorRepository _contractorRepository;
-    private readonly IAccountRepository _accountRepository;
-    private readonly ITransactionRepository _transactionRepository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public VendorsController(
-        IContractorRepository contractorRepository,
-        IAccountRepository accountRepository,
-        ITransactionRepository transactionRepository,
-        IUnitOfWork unitOfWork)
-    {
-        _contractorRepository = contractorRepository;
-        _accountRepository = accountRepository;
-        _transactionRepository = transactionRepository;
-        _unitOfWork = unitOfWork;
-    }
-
     [HttpPost]
     public async Task<ActionResult<CreateVendorResponse>> CreateVendor(
         [FromBody] CreateVendorRequest request,
@@ -36,13 +24,13 @@ public class VendorsController : ControllerBase
         {
             // Create contractor (vendor)
             var contractor = new Contractor(request.VendorName, ContractorType.Partner);
-            await _contractorRepository.AddAsync(contractor, cancellationToken);
+            await contractorRepository.AddAsync(contractor, cancellationToken);
 
             // Create revenue account for vendor earnings
             var revenueAccount = contractor.CreateAccount(AccountType.Revenue);
-            await _accountRepository.AddAsync(revenueAccount, cancellationToken);
+            await accountRepository.AddAsync(revenueAccount, cancellationToken);
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return CreatedAtAction(
                 nameof(GetVendor),
@@ -64,7 +52,7 @@ public class VendorsController : ControllerBase
         try
         {
             // Get vendor revenue account
-            var vendorAccount = await _accountRepository.GetByOwnerAndTypeAsync(
+            var vendorAccount = await accountRepository.GetByOwnerAndTypeAsync(
                 vendorId,
                 AccountType.Revenue,
                 cancellationToken);
@@ -78,7 +66,7 @@ public class VendorsController : ControllerBase
             var transaction = new Transaction($"Vendor commission bill - {request.Description}", null);
 
             // Debit company payable (company owes vendor)
-            var companyPayableAccount = await _accountRepository.GetByOwnerAndTypeAsync(
+            var companyPayableAccount = await accountRepository.GetByOwnerAndTypeAsync(
                 request.CompanyId,
                 AccountType.Payable,
                 cancellationToken);
@@ -97,14 +85,14 @@ public class VendorsController : ControllerBase
             companyPayableAccount?.Debit(new Money(request.Amount));
             vendorAccount.Credit(new Money(request.Amount));
 
-            await _transactionRepository.AddAsync(transaction, cancellationToken);
+            await transactionRepository.AddAsync(transaction, cancellationToken);
             if (companyPayableAccount != null)
             {
-                _accountRepository.Update(companyPayableAccount);
+                accountRepository.Update(companyPayableAccount);
             }
-            _accountRepository.Update(vendorAccount);
+            accountRepository.Update(vendorAccount);
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Ok(new CreateVendorBillResponse(
                 transaction.Id,
@@ -123,7 +111,7 @@ public class VendorsController : ControllerBase
         long vendorId,
         CancellationToken cancellationToken)
     {
-        var contractor = await _contractorRepository.GetByIdAsync(vendorId, cancellationToken);
+        var contractor = await contractorRepository.GetByIdAsync(vendorId, cancellationToken);
         if (contractor == null || contractor.ContractorType != ContractorType.Partner)
         {
             return NotFound(new { error = "Vendor not found" });
@@ -146,7 +134,7 @@ public class VendorsController : ControllerBase
         [FromQuery] DateTime? toDate,
         CancellationToken cancellationToken)
     {
-        var vendorAccount = await _accountRepository.GetByOwnerAndTypeAsync(
+        var vendorAccount = await accountRepository.GetByOwnerAndTypeAsync(
             vendorId,
             AccountType.Revenue,
             cancellationToken);
@@ -181,7 +169,7 @@ public class VendorsController : ControllerBase
         [FromQuery] DateTime? fromDate = null,
         [FromQuery] DateTime? toDate = null)
     {
-        var vendorAccount = await _accountRepository.GetByOwnerAndTypeAsync(
+        var vendorAccount = await accountRepository.GetByOwnerAndTypeAsync(
             vendorId,
             AccountType.Revenue,
             cancellationToken);
@@ -211,7 +199,7 @@ public class VendorsController : ControllerBase
     {
         try
         {
-            var vendorAccount = await _accountRepository.GetByOwnerAndTypeAsync(
+            var vendorAccount = await accountRepository.GetByOwnerAndTypeAsync(
                 vendorId,
                 AccountType.Revenue,
                 cancellationToken);
@@ -233,7 +221,7 @@ public class VendorsController : ControllerBase
             transaction.AddJournalEntry(vendorAccount.Id, new Money(request.SettlementAmount), Money.Zero);
 
             // Credit company cash account (cash paid out)
-            var companyCashAccount = await _accountRepository.GetByOwnerAndTypeAsync(
+            var companyCashAccount = await accountRepository.GetByOwnerAndTypeAsync(
                 request.CompanyId,
                 AccountType.Payable,
                 cancellationToken);
@@ -249,14 +237,14 @@ public class VendorsController : ControllerBase
             vendorAccount.Debit(new Money(request.SettlementAmount));
             companyCashAccount?.Credit(new Money(request.SettlementAmount));
 
-            await _transactionRepository.AddAsync(transaction, cancellationToken);
-            _accountRepository.Update(vendorAccount);
+            await transactionRepository.AddAsync(transaction, cancellationToken);
+            accountRepository.Update(vendorAccount);
             if (companyCashAccount != null)
             {
-                _accountRepository.Update(companyCashAccount);
+                accountRepository.Update(companyCashAccount);
             }
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Ok(new ProcessVendorSettlementResponse(
                 transaction.Id,

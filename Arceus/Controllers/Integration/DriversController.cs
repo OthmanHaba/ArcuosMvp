@@ -8,25 +8,13 @@ namespace Arceus.Controllers.Integration;
 
 [ApiController]
 [Route("api/integration/drivers")]
-public class DriversController : ControllerBase
+public class DriversController(
+    IContractorRepository contractorRepository,
+    IAccountRepository accountRepository,
+    ITransactionRepository transactionRepository,
+    IUnitOfWork unitOfWork)
+    : ControllerBase
 {
-    private readonly IContractorRepository _contractorRepository;
-    private readonly IAccountRepository _accountRepository;
-    private readonly ITransactionRepository _transactionRepository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public DriversController(
-        IContractorRepository contractorRepository,
-        IAccountRepository accountRepository,
-        ITransactionRepository transactionRepository,
-        IUnitOfWork unitOfWork)
-    {
-        _contractorRepository = contractorRepository;
-        _accountRepository = accountRepository;
-        _transactionRepository = transactionRepository;
-        _unitOfWork = unitOfWork;
-    }
-
     [HttpPost]
     public async Task<ActionResult<CreateDriverResponse>> CreateDriver(
         [FromBody] CreateDriverRequest request,
@@ -36,13 +24,13 @@ public class DriversController : ControllerBase
         {
             // Create contractor (driver)
             var contractor = new Contractor(request.FullName, ContractorType.Driver);
-            await _contractorRepository.AddAsync(contractor, cancellationToken);
+            await contractorRepository.AddAsync(contractor, cancellationToken);
 
             // Create revenue account for driver earnings
             var revenueAccount = contractor.CreateAccount(AccountType.Revenue);
-            await _accountRepository.AddAsync(revenueAccount, cancellationToken);
+            await accountRepository.AddAsync(revenueAccount, cancellationToken);
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return CreatedAtAction(
                 nameof(GetDriver),
@@ -64,7 +52,7 @@ public class DriversController : ControllerBase
         try
         {
             // Get driver revenue account
-            var driverAccount = await _accountRepository.GetByOwnerAndTypeAsync(
+            var driverAccount = await accountRepository.GetByOwnerAndTypeAsync(
                 driverId,
                 AccountType.Revenue,
                 cancellationToken);
@@ -85,7 +73,7 @@ public class DriversController : ControllerBase
             transaction.AddJournalEntry(driverAccount.Id, Money.Zero, new Money(request.Amount));
 
             // Debit company payable account (company owes driver)
-            var companyPayableAccount = await _accountRepository.GetByOwnerAndTypeAsync(
+            var companyPayableAccount = await accountRepository.GetByOwnerAndTypeAsync(
                 request.CompanyId,
                 AccountType.Payable,
                 cancellationToken);
@@ -101,14 +89,14 @@ public class DriversController : ControllerBase
             driverAccount.Credit(new Money(request.Amount));
             companyPayableAccount?.Debit(new Money(request.Amount));
 
-            await _transactionRepository.AddAsync(transaction, cancellationToken);
-            _accountRepository.Update(driverAccount);
+            await transactionRepository.AddAsync(transaction, cancellationToken);
+            accountRepository.Update(driverAccount);
             if (companyPayableAccount != null)
             {
-                _accountRepository.Update(companyPayableAccount);
+                accountRepository.Update(companyPayableAccount);
             }
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Ok(new AddDriverEarningsResponse(
                 transaction.Id,
@@ -129,7 +117,7 @@ public class DriversController : ControllerBase
     {
         try
         {
-            var driverAccount = await _accountRepository.GetByOwnerAndTypeAsync(
+            var driverAccount = await accountRepository.GetByOwnerAndTypeAsync(
                 driverId,
                 AccountType.Revenue,
                 cancellationToken);
@@ -145,7 +133,7 @@ public class DriversController : ControllerBase
             transaction.AddJournalEntry(driverAccount.Id, Money.Zero, new Money(request.Amount));
 
             // Debit company payable account
-            var companyPayableAccount = await _accountRepository.GetByOwnerAndTypeAsync(
+            var companyPayableAccount = await accountRepository.GetByOwnerAndTypeAsync(
                 request.CompanyId,
                 AccountType.Payable,
                 cancellationToken);
@@ -160,14 +148,14 @@ public class DriversController : ControllerBase
             driverAccount.Credit(new Money(request.Amount));
             companyPayableAccount?.Debit(new Money(request.Amount));
 
-            await _transactionRepository.AddAsync(transaction, cancellationToken);
-            _accountRepository.Update(driverAccount);
+            await transactionRepository.AddAsync(transaction, cancellationToken);
+            accountRepository.Update(driverAccount);
             if (companyPayableAccount != null)
             {
-                _accountRepository.Update(companyPayableAccount);
+                accountRepository.Update(companyPayableAccount);
             }
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Ok(new AddDriverRewardResponse(transaction.Id));
         }
@@ -182,7 +170,7 @@ public class DriversController : ControllerBase
         long driverId,
         CancellationToken cancellationToken)
     {
-        var contractor = await _contractorRepository.GetByIdAsync(driverId, cancellationToken);
+        var contractor = await contractorRepository.GetByIdAsync(driverId, cancellationToken);
         if (contractor == null || contractor.ContractorType != ContractorType.Driver)
         {
             return NotFound(new { error = "Driver not found" });
@@ -205,7 +193,7 @@ public class DriversController : ControllerBase
         [FromQuery] DateTime? toDate,
         CancellationToken cancellationToken)
     {
-        var driverAccount = await _accountRepository.GetByOwnerAndTypeAsync(
+        var driverAccount = await accountRepository.GetByOwnerAndTypeAsync(
             driverId,
             AccountType.Revenue,
             cancellationToken);
@@ -230,7 +218,7 @@ public class DriversController : ControllerBase
         long driverId,
         CancellationToken cancellationToken)
     {
-        var driverAccount = await _accountRepository.GetByOwnerAndTypeAsync(
+        var driverAccount = await accountRepository.GetByOwnerAndTypeAsync(
             driverId,
             AccountType.Revenue,
             cancellationToken);

@@ -8,25 +8,13 @@ namespace Arceus.Controllers.Integration;
 
 [ApiController]
 [Route("api/integration/restaurants")]
-public class RestaurantsController : ControllerBase
+public class RestaurantsController(
+    IContractorRepository contractorRepository,
+    IAccountRepository accountRepository,
+    ITransactionRepository transactionRepository,
+    IUnitOfWork unitOfWork)
+    : ControllerBase
 {
-    private readonly IContractorRepository _contractorRepository;
-    private readonly IAccountRepository _accountRepository;
-    private readonly ITransactionRepository _transactionRepository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public RestaurantsController(
-        IContractorRepository contractorRepository,
-        IAccountRepository accountRepository,
-        ITransactionRepository transactionRepository,
-        IUnitOfWork unitOfWork)
-    {
-        _contractorRepository = contractorRepository;
-        _accountRepository = accountRepository;
-        _transactionRepository = transactionRepository;
-        _unitOfWork = unitOfWork;
-    }
-
     [HttpPost]
     public async Task<ActionResult<CreateRestaurantResponse>> CreateRestaurant(
         [FromBody] CreateRestaurantRequest request,
@@ -36,13 +24,13 @@ public class RestaurantsController : ControllerBase
         {
             // Create contractor (restaurant)
             var contractor = new Contractor(request.RestaurantName, ContractorType.Partner);
-            await _contractorRepository.AddAsync(contractor, cancellationToken);
+            await contractorRepository.AddAsync(contractor, cancellationToken);
 
             // Create revenue account for restaurant earnings
             var revenueAccount = contractor.CreateAccount(AccountType.Revenue);
-            await _accountRepository.AddAsync(revenueAccount, cancellationToken);
+            await accountRepository.AddAsync(revenueAccount, cancellationToken);
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return CreatedAtAction(
                 nameof(GetRestaurant),
@@ -64,7 +52,7 @@ public class RestaurantsController : ControllerBase
         try
         {
             // Get restaurant revenue account
-            var restaurantAccount = await _accountRepository.GetByOwnerAndTypeAsync(
+            var restaurantAccount = await accountRepository.GetByOwnerAndTypeAsync(
                 restaurantId,
                 AccountType.Revenue,
                 cancellationToken);
@@ -85,7 +73,7 @@ public class RestaurantsController : ControllerBase
             transaction.AddJournalEntry(restaurantAccount.Id, Money.Zero, new Money(request.Amount));
 
             // Debit company payable account (company owes restaurant)
-            var companyPayableAccount = await _accountRepository.GetByOwnerAndTypeAsync(
+            var companyPayableAccount = await accountRepository.GetByOwnerAndTypeAsync(
                 request.CompanyId,
                 AccountType.Payable,
                 cancellationToken);
@@ -101,14 +89,14 @@ public class RestaurantsController : ControllerBase
             restaurantAccount.Credit(new Money(request.Amount));
             companyPayableAccount?.Debit(new Money(request.Amount));
 
-            await _transactionRepository.AddAsync(transaction, cancellationToken);
-            _accountRepository.Update(restaurantAccount);
+            await transactionRepository.AddAsync(transaction, cancellationToken);
+            accountRepository.Update(restaurantAccount);
             if (companyPayableAccount != null)
             {
-                _accountRepository.Update(companyPayableAccount);
+                accountRepository.Update(companyPayableAccount);
             }
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Ok(new AddRestaurantEarningsResponse(
                 transaction.Id,
@@ -126,7 +114,7 @@ public class RestaurantsController : ControllerBase
         long restaurantId,
         CancellationToken cancellationToken)
     {
-        var contractor = await _contractorRepository.GetByIdAsync(restaurantId, cancellationToken);
+        var contractor = await contractorRepository.GetByIdAsync(restaurantId, cancellationToken);
         if (contractor == null || contractor.ContractorType != ContractorType.Partner)
         {
             return NotFound(new { error = "Restaurant not found" });
@@ -149,7 +137,7 @@ public class RestaurantsController : ControllerBase
         [FromQuery] DateTime? toDate,
         CancellationToken cancellationToken)
     {
-        var restaurantAccount = await _accountRepository.GetByOwnerAndTypeAsync(
+        var restaurantAccount = await accountRepository.GetByOwnerAndTypeAsync(
             restaurantId,
             AccountType.Revenue,
             cancellationToken);
@@ -174,7 +162,7 @@ public class RestaurantsController : ControllerBase
         long restaurantId,
         CancellationToken cancellationToken)
     {
-        var restaurantAccount = await _accountRepository.GetByOwnerAndTypeAsync(
+        var restaurantAccount = await accountRepository.GetByOwnerAndTypeAsync(
             restaurantId,
             AccountType.Revenue,
             cancellationToken);
@@ -200,7 +188,7 @@ public class RestaurantsController : ControllerBase
     {
         try
         {
-            var restaurantAccount = await _accountRepository.GetByOwnerAndTypeAsync(
+            var restaurantAccount = await accountRepository.GetByOwnerAndTypeAsync(
                 restaurantId,
                 AccountType.Revenue,
                 cancellationToken);
@@ -222,7 +210,7 @@ public class RestaurantsController : ControllerBase
             transaction.AddJournalEntry(restaurantAccount.Id, new Money(request.SettlementAmount), Money.Zero);
 
             // Credit company cash account (cash paid out)
-            var companyCashAccount = await _accountRepository.GetByOwnerAndTypeAsync(
+            var companyCashAccount = await accountRepository.GetByOwnerAndTypeAsync(
                 request.CompanyId,
                 AccountType.Payable,
                 cancellationToken);
@@ -238,14 +226,14 @@ public class RestaurantsController : ControllerBase
             restaurantAccount.Debit(new Money(request.SettlementAmount));
             companyCashAccount?.Credit(new Money(request.SettlementAmount));
 
-            await _transactionRepository.AddAsync(transaction, cancellationToken);
-            _accountRepository.Update(restaurantAccount);
+            await transactionRepository.AddAsync(transaction, cancellationToken);
+            accountRepository.Update(restaurantAccount);
             if (companyCashAccount != null)
             {
-                _accountRepository.Update(companyCashAccount);
+                accountRepository.Update(companyCashAccount);
             }
 
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            await unitOfWork.SaveChangesAsync(cancellationToken);
 
             return Ok(new ProcessRestaurantSettlementResponse(
                 transaction.Id,

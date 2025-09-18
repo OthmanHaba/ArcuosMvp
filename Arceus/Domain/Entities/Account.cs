@@ -9,7 +9,6 @@ public class Account
     public long OwnerId { get; private set; }
     public AccountType AccountType { get; private set; }
     public Money Balance { get; private set; }
-    public byte[] Version { get; private set; } = Array.Empty<byte>();
 
     public Contractor Owner { get; private set; } = null!;
 

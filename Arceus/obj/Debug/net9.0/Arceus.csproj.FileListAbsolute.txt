@@ -136,3 +136,7 @@
 /Users/m/dotnet/Arceus/Arceus/bin/Debug/net9.0/Microsoft.IdentityModel.JsonWebTokens.dll
 /Users/m/dotnet/Arceus/Arceus/bin/Debug/net9.0/Microsoft.IdentityModel.Logging.dll
 /Users/m/dotnet/Arceus/Arceus/bin/Debug/net9.0/Microsoft.IdentityModel.Tokens.dll
+/Users/m/dotnet/Arceus/Arceus/bin/Debug/net9.0/http-client.private.env.json
+/Users/m/dotnet/Arceus/Arceus/bin/Debug/net9.0/Swashbuckle.AspNetCore.Swagger.dll
+/Users/m/dotnet/Arceus/Arceus/bin/Debug/net9.0/Swashbuckle.AspNetCore.SwaggerGen.dll
+/Users/m/dotnet/Arceus/Arceus/bin/Debug/net9.0/Swashbuckle.AspNetCore.SwaggerUI.dll

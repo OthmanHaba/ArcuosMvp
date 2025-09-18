@@ -7,15 +7,8 @@ namespace Arceus.Controllers.Integration;
 
 [ApiController]
 [Route("api/integration/orders")]
-public class OrdersController : ControllerBase
+public class OrdersController(IMediator mediator) : ControllerBase
 {
-    private readonly IMediator _mediator;
-
-    public OrdersController(IMediator mediator)
-    {
-        _mediator = mediator;
-    }
-
     [HttpPost("jet")]
     public async Task<ActionResult<CreateOrderResponse>> CreateJetOrder(
         [FromBody] CreateJetOrderRequest request,
@@ -35,7 +28,7 @@ public class OrdersController : ControllerBase
                 request.CompanyId
             );
 
-            var result = await _mediator.Send(command, cancellationToken);
+            var result = await mediator.Send(command, cancellationToken);
 
             return CreatedAtAction(
                 nameof(GetOrderTransaction),
@@ -67,7 +60,7 @@ public class OrdersController : ControllerBase
                 request.CompanyId
             );
 
-            var result = await _mediator.Send(command, cancellationToken);
+            var result = await mediator.Send(command, cancellationToken);
 
             return CreatedAtAction(
                 nameof(GetOrderTransaction),
@@ -99,7 +92,7 @@ public class OrdersController : ControllerBase
                 request.CompanyId
             );
 
-            var result = await _mediator.Send(command, cancellationToken);
+            var result = await mediator.Send(command, cancellationToken);
 
             return CreatedAtAction(
                 nameof(GetOrderTransaction),
@@ -133,7 +126,7 @@ public class OrdersController : ControllerBase
                 request.CompanyId
             );
 
-            var result = await _mediator.Send(command, cancellationToken);
+            var result = await mediator.Send(command, cancellationToken);
 
             return Ok(new { transactionId = result.TransactionId, message = "Order cancelled and refunded" });
         }
@@ -164,7 +157,7 @@ public class OrdersController : ControllerBase
                 request.CompanyId
             );
 
-            var result = await _mediator.Send(command, cancellationToken);
+            var result = await mediator.Send(command, cancellationToken);
 
             return Ok(new { transactionId = result.TransactionId, message = "Order returned and refunded" });
         }
