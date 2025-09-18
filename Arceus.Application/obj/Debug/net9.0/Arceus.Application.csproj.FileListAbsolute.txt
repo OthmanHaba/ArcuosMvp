@@ -1,0 +1,15 @@
+/Users/m/dotnet/Arceus/Arceus.Application/obj/Debug/net9.0/Arceus.Application.csproj.AssemblyReference.cache
+/Users/m/dotnet/Arceus/Arceus.Application/obj/Debug/net9.0/Arceus.Application.GeneratedMSBuildEditorConfig.editorconfig
+/Users/m/dotnet/Arceus/Arceus.Application/obj/Debug/net9.0/Arceus.Application.AssemblyInfoInputs.cache
+/Users/m/dotnet/Arceus/Arceus.Application/obj/Debug/net9.0/Arceus.Application.AssemblyInfo.cs
+/Users/m/dotnet/Arceus/Arceus.Application/obj/Debug/net9.0/Arceus.Application.csproj.CoreCompileInputs.cache
+/Users/m/dotnet/Arceus/Arceus.Application/bin/Debug/net9.0/Arceus.Application.deps.json
+/Users/m/dotnet/Arceus/Arceus.Application/bin/Debug/net9.0/Arceus.Application.dll
+/Users/m/dotnet/Arceus/Arceus.Application/bin/Debug/net9.0/Arceus.Application.pdb
+/Users/m/dotnet/Arceus/Arceus.Application/bin/Debug/net9.0/Arceus.Domain.dll
+/Users/m/dotnet/Arceus/Arceus.Application/bin/Debug/net9.0/Arceus.Domain.pdb
+/Users/m/dotnet/Arceus/Arceus.Application/obj/Debug/net9.0/Arceus.A.82E2814A.Up2Date
+/Users/m/dotnet/Arceus/Arceus.Application/obj/Debug/net9.0/Arceus.Application.dll
+/Users/m/dotnet/Arceus/Arceus.Application/obj/Debug/net9.0/refint/Arceus.Application.dll
+/Users/m/dotnet/Arceus/Arceus.Application/obj/Debug/net9.0/Arceus.Application.pdb
+/Users/m/dotnet/Arceus/Arceus.Application/obj/Debug/net9.0/ref/Arceus.Application.dll

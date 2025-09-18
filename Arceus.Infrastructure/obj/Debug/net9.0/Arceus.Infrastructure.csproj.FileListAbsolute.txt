@@ -1,0 +1,17 @@
+/Users/m/dotnet/Arceus/Arceus.Infrastructure/bin/Debug/net9.0/Arceus.Infrastructure.deps.json
+/Users/m/dotnet/Arceus/Arceus.Infrastructure/bin/Debug/net9.0/Arceus.Infrastructure.dll
+/Users/m/dotnet/Arceus/Arceus.Infrastructure/bin/Debug/net9.0/Arceus.Infrastructure.pdb
+/Users/m/dotnet/Arceus/Arceus.Infrastructure/bin/Debug/net9.0/Arceus.Application.dll
+/Users/m/dotnet/Arceus/Arceus.Infrastructure/bin/Debug/net9.0/Arceus.Domain.dll
+/Users/m/dotnet/Arceus/Arceus.Infrastructure/bin/Debug/net9.0/Arceus.Application.pdb
+/Users/m/dotnet/Arceus/Arceus.Infrastructure/bin/Debug/net9.0/Arceus.Domain.pdb
+/Users/m/dotnet/Arceus/Arceus.Infrastructure/obj/Debug/net9.0/Arceus.Infrastructure.csproj.AssemblyReference.cache
+/Users/m/dotnet/Arceus/Arceus.Infrastructure/obj/Debug/net9.0/Arceus.Infrastructure.GeneratedMSBuildEditorConfig.editorconfig
+/Users/m/dotnet/Arceus/Arceus.Infrastructure/obj/Debug/net9.0/Arceus.Infrastructure.AssemblyInfoInputs.cache
+/Users/m/dotnet/Arceus/Arceus.Infrastructure/obj/Debug/net9.0/Arceus.Infrastructure.AssemblyInfo.cs
+/Users/m/dotnet/Arceus/Arceus.Infrastructure/obj/Debug/net9.0/Arceus.Infrastructure.csproj.CoreCompileInputs.cache
+/Users/m/dotnet/Arceus/Arceus.Infrastructure/obj/Debug/net9.0/Arceus.I.A3DA926E.Up2Date
+/Users/m/dotnet/Arceus/Arceus.Infrastructure/obj/Debug/net9.0/Arceus.Infrastructure.dll
+/Users/m/dotnet/Arceus/Arceus.Infrastructure/obj/Debug/net9.0/refint/Arceus.Infrastructure.dll
+/Users/m/dotnet/Arceus/Arceus.Infrastructure/obj/Debug/net9.0/Arceus.Infrastructure.pdb
+/Users/m/dotnet/Arceus/Arceus.Infrastructure/obj/Debug/net9.0/ref/Arceus.Infrastructure.dll
