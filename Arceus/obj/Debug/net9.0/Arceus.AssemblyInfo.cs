@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Arceus")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+74110a26e0737b652dfae4a73efb28823e45fa1e")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e0bae085333b7421b545ba4d7d1a991926478cde")]
 [assembly: System.Reflection.AssemblyProductAttribute("Arceus")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Arceus")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
