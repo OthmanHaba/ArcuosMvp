@@ -11,9 +11,9 @@ public class AccountConfiguration : IEntityTypeConfiguration<Account>
     {
         builder.ToTable("accounts");
 
-        builder.HasKey(a => a.Id);
+        builder.HasKey(a => a.Idddd);
 
-        builder.Property(a => a.Id)
+        builder.Property(a => a.Idddd)
             .HasColumnName("id")
             .ValueGeneratedOnAdd();
 

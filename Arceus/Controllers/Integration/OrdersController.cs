@@ -168,10 +168,10 @@ public class OrdersController(IMediator mediator) : ControllerBase
     }
 
     [HttpGet("transactions/{id}")]
-    public async Task<ActionResult> GetOrderTransaction(long id)
+    public Task<ActionResult> GetOrderTransaction(long id)
     {
         // This would be implemented with a query handler
-        return Ok(new { transactionId = id, message = "Transaction details not implemented yet" });
+        return Task.FromResult<ActionResult>(Ok(new { transactionId = id, message = "Transaction details not implemented yet" }));
     }
 }
 

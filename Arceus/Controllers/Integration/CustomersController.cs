@@ -33,7 +33,7 @@ public class CustomersController(
             return CreatedAtAction(
                 nameof(GetCustomer),
                 new { id = contractor.Id },
-                new CreateCustomerResponse(contractor.Id, walletAccount.Id));
+                new CreateCustomerResponse(contractor.Id, walletAccount.Idddd));
         }
         catch (ArgumentException ex)
         {
@@ -55,7 +55,7 @@ public class CustomersController(
                 return NotFound(new { error = "Customer not found" });
             }
 
-            // Update would require adding update methods to the domain entity
+            // dont know what to do exactly 
             // For now, this is a placeholder
 
             contractorRepository.Update(contractor);
@@ -86,7 +86,7 @@ public class CustomersController(
             contractor.Id,
             contractor.FullName,
             contractor.CreatedAt,
-            walletAccount?.Id,
+            walletAccount?.Idddd,
             walletAccount?.Balance.Amount ?? 0
         ));
     }

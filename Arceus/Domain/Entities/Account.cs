@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Arceus.Domain.Enums;
 using Arceus.Domain.ValueObjects;
 
@@ -5,8 +6,9 @@ namespace Arceus.Domain.Entities;
 
 public class Account
 {
-    public long Id { get; private set; }
+    public long Idddd { get; private set; }
     public long OwnerId { get; private set; }
+    
     public AccountType AccountType { get; private set; }
     public Money Balance { get; private set; }
 

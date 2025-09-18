@@ -1,3 +1,4 @@
+using Arceus.Application.Common;
 using Arceus.Application.Common.Interfaces;
 using Arceus.Domain.Entities;
 using Arceus.Domain.Enums;
@@ -6,26 +7,13 @@ using MediatR;
 
 namespace Arceus.Application.Features.Accounts.Commands.ChargeWallet;
 
-public class ChargeWalletCommandHandler : IRequestHandler<ChargeWalletCommand, ChargeWalletResult>
+public class ChargeWalletCommandHandler(
+    IPaymentGatewayService paymentGatewayService,
+    IAccountRepository accountRepository,
+    ITransactionRepository transactionRepository,
+    IUnitOfWork unitOfWork)
+    : IRequestHandler<ChargeWalletCommand, ChargeWalletResult>
 {
-    private readonly IPaymentGatewayService _paymentGatewayService;
-    private readonly IAccountRepository _accountRepository;
-    private readonly ITransactionRepository _transactionRepository;
-    private readonly IUnitOfWork _unitOfWork;
-
-    public ChargeWalletCommandHandler(
-        IPaymentGatewayService paymentGatewayService,
-        IAccountRepository accountRepository,
-        ITransactionRepository transactionRepository,
-        IUnitOfWork unitOfWork
-    )
-    {
-        _paymentGatewayService = paymentGatewayService;
-        _accountRepository = accountRepository;
-        _transactionRepository = transactionRepository;
-        _unitOfWork = unitOfWork;
-    }
-
     public async Task<ChargeWalletResult> Handle(ChargeWalletCommand request, CancellationToken cancellationToken)
     {
         if (request.Amount <= Money.Zero)
@@ -33,7 +21,7 @@ public class ChargeWalletCommandHandler : IRequestHandler<ChargeWalletCommand, C
             throw new ArgumentException("Charge amount must be positive");
         }
 
-        var paymentResult = await _paymentGatewayService.ProcessPaymentAsync(
+        var paymentResult = await paymentGatewayService.ProcessPaymentAsync(
             request.PaymentToken,
             request.Amount,
             cancellationToken);
@@ -45,12 +33,13 @@ public class ChargeWalletCommandHandler : IRequestHandler<ChargeWalletCommand, C
 
         // Fetch required accounts
         var customerWalletAccount =
-            await _accountRepository.GetByOwnerAndTypeAsync(request.CustomerId, AccountType.Wallet, cancellationToken)
+            await accountRepository.GetByOwnerAndTypeAsync(request.CustomerId, AccountType.Wallet, cancellationToken)
             ?? throw new InvalidOperationException($"Customer {request.CustomerId} does not have a wallet account");
 
-        // var companyCashAccount =
-        //     await _accountRepository.GetByOwnerAndTypeAsync(request.CompanyId, AccountType.Payable, cancellationToken)
-        //     ?? throw new InvalidOperationException($"Company {request.CompanyId} does not have a payable account");
+        var companyCashAccount =
+            await accountRepository.GetByOwnerAndTypeAsync(Global.CompanyId, AccountType.Payable,
+                cancellationToken)
+            ?? throw new InvalidOperationException($"Company {Global.CompanyId} does not have a payable account");
 
         // Create the transaction
         var description =
@@ -59,10 +48,10 @@ public class ChargeWalletCommandHandler : IRequestHandler<ChargeWalletCommand, C
 
         // Add journal entries
         // Credit customer wallet (money in)
-        transaction.AddJournalEntry(customerWalletAccount.Id, Money.Zero, request.Amount);
+        transaction.AddJournalEntry(customerWalletAccount.Idddd, Money.Zero, request.Amount);
 
         // Debit company cash account (representing cash received from payment gateway)
-        // transaction.AddJournalEntry(companyCashAccount.Id, request.Amount, Money.Zero);
+        transaction.AddJournalEntry(companyCashAccount.Idddd, request.Amount, Money.Zero);
 
         // Validate double-entry accounting
         transaction.ValidateDoubleEntry();
@@ -75,11 +64,11 @@ public class ChargeWalletCommandHandler : IRequestHandler<ChargeWalletCommand, C
         transaction.MarkComplete();
 
         // Persist changes
-        await _transactionRepository.AddAsync(transaction, cancellationToken);
-        _accountRepository.Update(customerWalletAccount);
+        await transactionRepository.AddAsync(transaction, cancellationToken);
+        accountRepository.Update(customerWalletAccount);
         // _accountRepository.Update(companyCashAccount);
 
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        await unitOfWork.SaveChangesAsync(cancellationToken);
 
         return new ChargeWalletResult(transaction.Id, paymentResult.TransactionId!);
     }

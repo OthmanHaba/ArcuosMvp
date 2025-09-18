@@ -35,7 +35,7 @@ public class DriversController(
             return CreatedAtAction(
                 nameof(GetDriver),
                 new { id = contractor.Id },
-                new CreateDriverResponse(contractor.Id, revenueAccount.Id));
+                new CreateDriverResponse(contractor.Id, revenueAccount.Idddd));
         }
         catch (ArgumentException ex)
         {
@@ -70,7 +70,7 @@ public class DriversController(
             var transaction = new Transaction(description, request.OrderId);
 
             // Credit driver account
-            transaction.AddJournalEntry(driverAccount.Id, Money.Zero, new Money(request.Amount));
+            transaction.AddJournalEntry(driverAccount.Idddd, Money.Zero, new Money(request.Amount));
 
             // Debit company payable account (company owes driver)
             var companyPayableAccount = await accountRepository.GetByOwnerAndTypeAsync(
@@ -80,7 +80,7 @@ public class DriversController(
 
             if (companyPayableAccount != null)
             {
-                transaction.AddJournalEntry(companyPayableAccount.Id, new Money(request.Amount), Money.Zero);
+                transaction.AddJournalEntry(companyPayableAccount.Idddd, new Money(request.Amount), Money.Zero);
             }
 
             transaction.MarkComplete();
@@ -130,7 +130,7 @@ public class DriversController(
             var transaction = new Transaction($"Driver reward: {request.RewardType}", null);
 
             // Credit driver account
-            transaction.AddJournalEntry(driverAccount.Id, Money.Zero, new Money(request.Amount));
+            transaction.AddJournalEntry(driverAccount.Idddd, Money.Zero, new Money(request.Amount));
 
             // Debit company payable account
             var companyPayableAccount = await accountRepository.GetByOwnerAndTypeAsync(
@@ -140,7 +140,7 @@ public class DriversController(
 
             if (companyPayableAccount != null)
             {
-                transaction.AddJournalEntry(companyPayableAccount.Id, new Money(request.Amount), Money.Zero);
+                transaction.AddJournalEntry(companyPayableAccount.Idddd, new Money(request.Amount), Money.Zero);
             }
 
             transaction.MarkComplete();

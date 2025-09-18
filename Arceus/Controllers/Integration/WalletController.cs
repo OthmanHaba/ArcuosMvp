@@ -1,3 +1,4 @@
+using Arceus.Application.Common;
 using Arceus.Application.Features.Accounts.Commands.ChargeWallet;
 using Arceus.Application.Common.Interfaces;
 using Arceus.Domain.Entities;
@@ -88,17 +89,17 @@ public class WalletController : ControllerBase
             var transaction = new Transaction($"Wallet deduction for order #{request.OrderId}", request.OrderId);
 
             // Debit customer wallet
-            transaction.AddJournalEntry(walletAccount.Id, new Money(request.Amount), Money.Zero);
+            transaction.AddJournalEntry(walletAccount.Idddd, new Money(request.Amount), Money.Zero);
 
             // Credit company revenue (assuming company ID is provided)
             var companyRevenueAccount = await _accountRepository.GetByOwnerAndTypeAsync(
-                request.CompanyId,
+                Global.CompanyId,
                 AccountType.Revenue,
                 cancellationToken);
 
             if (companyRevenueAccount != null)
             {
-                transaction.AddJournalEntry(companyRevenueAccount.Id, Money.Zero, new Money(request.Amount));
+                transaction.AddJournalEntry(companyRevenueAccount.Idddd, Money.Zero, new Money(request.Amount));
             }
 
             transaction.MarkComplete();
@@ -192,8 +193,7 @@ public record ChargeWalletResponse(
 public record DeductWalletRequest(
     long CustomerId,
     decimal Amount,
-    long? OrderId,
-    long CompanyId
+    long? OrderId
 );
 
 public record DeductWalletResponse(

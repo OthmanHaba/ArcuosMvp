@@ -18,7 +18,7 @@ public class AccountRepository : IAccountRepository
     {
         return await _context.Accounts
             .Include(a => a.Owner)
-            .FirstOrDefaultAsync(a => a.Id == accountId, cancellationToken);
+            .FirstOrDefaultAsync(a => a.Idddd == accountId, cancellationToken);
     }
 
     public async Task<Account?> GetByOwnerAndTypeAsync(long ownerId, AccountType accountType, CancellationToken cancellationToken = default)

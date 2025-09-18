@@ -35,7 +35,7 @@ public class VendorsController(
             return CreatedAtAction(
                 nameof(GetVendor),
                 new { id = contractor.Id },
-                new CreateVendorResponse(contractor.Id, revenueAccount.Id));
+                new CreateVendorResponse(contractor.Id, revenueAccount.Idddd));
         }
         catch (ArgumentException ex)
         {
@@ -73,11 +73,11 @@ public class VendorsController(
 
             if (companyPayableAccount != null)
             {
-                transaction.AddJournalEntry(companyPayableAccount.Id, new Money(request.Amount), Money.Zero);
+                transaction.AddJournalEntry(companyPayableAccount.Idddd, new Money(request.Amount), Money.Zero);
             }
 
             // Credit vendor revenue
-            transaction.AddJournalEntry(vendorAccount.Id, Money.Zero, new Money(request.Amount));
+            transaction.AddJournalEntry(vendorAccount.Idddd, Money.Zero, new Money(request.Amount));
 
             transaction.MarkComplete();
 
@@ -218,7 +218,7 @@ public class VendorsController(
             var transaction = new Transaction($"Vendor settlement payment - {request.PaymentReference}", null);
 
             // Debit vendor account (settlement paid)
-            transaction.AddJournalEntry(vendorAccount.Id, new Money(request.SettlementAmount), Money.Zero);
+            transaction.AddJournalEntry(vendorAccount.Idddd, new Money(request.SettlementAmount), Money.Zero);
 
             // Credit company cash account (cash paid out)
             var companyCashAccount = await accountRepository.GetByOwnerAndTypeAsync(
@@ -228,7 +228,7 @@ public class VendorsController(
 
             if (companyCashAccount != null)
             {
-                transaction.AddJournalEntry(companyCashAccount.Id, Money.Zero, new Money(request.SettlementAmount));
+                transaction.AddJournalEntry(companyCashAccount.Idddd, Money.Zero, new Money(request.SettlementAmount));
             }
 
             transaction.MarkComplete();

@@ -59,24 +59,24 @@ public class CreateTransactionCommandHandler : IRequestHandler<CreateTransaction
 
         // Add journal entries
         // Debit customer account (money out)
-        transaction.AddJournalEntry(customerAccount.Id, request.TotalAmount, Money.Zero);
+        transaction.AddJournalEntry(customerAccount.Idddd, request.TotalAmount, Money.Zero);
 
         // Credit driver account (money in)
         if (request.DriverShare > Money.Zero)
         {
-            transaction.AddJournalEntry(driverAccount.Id, Money.Zero, request.DriverShare);
+            transaction.AddJournalEntry(driverAccount.Idddd, Money.Zero, request.DriverShare);
         }
 
         // Credit partner account (money in)
         if (request.PartnerShare > Money.Zero)
         {
-            transaction.AddJournalEntry(partnerAccount.Id, Money.Zero, request.PartnerShare);
+            transaction.AddJournalEntry(partnerAccount.Idddd, Money.Zero, request.PartnerShare);
         }
 
         // Credit company account (money in)
         if (request.CompanyShare > Money.Zero)
         {
-            transaction.AddJournalEntry(companyAccount.Id, Money.Zero, request.CompanyShare);
+            transaction.AddJournalEntry(companyAccount.Idddd, Money.Zero, request.CompanyShare);
         }
 
         // Validate double-entry accounting
